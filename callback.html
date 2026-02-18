@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micki79 ViralFlow - TikTok Authorization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a3e);
+            color: #fff; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .container {
+            background: rgba(26,26,62,0.9); border-radius: 20px;
+            padding: 3rem; max-width: 500px; text-align: center;
+            border: 2px solid #4ecdc4; box-shadow: 0 0 30px rgba(78,205,196,0.2);
+        }
+        .icon { font-size: 4rem; margin-bottom: 1rem; }
+        h1 { color: #4ecdc4; margin-bottom: 0.5rem; font-size: 1.5rem; }
+        p { color: #8892b0; margin-bottom: 1rem; line-height: 1.6; }
+        .status { 
+            background: #16213e; border-radius: 10px; padding: 1rem;
+            margin: 1rem 0; font-family: monospace; font-size: 0.85rem;
+            color: #4ecdc4;
+        }
+        .error { border-color: #e94560; }
+        .error h1 { color: #e94560; }
+        .error .status { color: #e94560; }
+        a { color: #4ecdc4; }
+    </style>
+</head>
+<body>
+    <div class="container" id="main">
+        <div class="icon" id="icon">&#x23F3;</div>
+        <h1 id="title">Processing Authorization...</h1>
+        <p id="msg">Connecting your TikTok account to ViralFlow.</p>
+        <div class="status" id="status">Redirecting...</div>
+    </div>
+    <script>
+        const p = new URLSearchParams(window.location.search);
+        const code = p.get('code');
+        const state = p.get('state');
+        const error = p.get('error');
+        var c = document.getElementById('main');
+        var s = document.getElementById('status');
+
+        if (error) {
+            c.classList.add('error');
+            document.getElementById('icon').textContent = '\u274C';
+            document.getElementById('title').textContent = 'Authorization Failed';
+            document.getElementById('msg').textContent = p.get('error_description') || 'Authorization denied.';
+            s.textContent = 'Error: ' + error;
+        } else if (code) {
+            var url = 'http://192.168.2.73:5000/api/tiktok/auth/callback?code=' + encodeURIComponent(code);
+            if (state) url += '&state=' + encodeURIComponent(state);
+            s.textContent = 'Code received! Redirecting to ViralFlow...';
+            setTimeout(function(){ window.location.href = url; }, 1500);
+            setTimeout(function(){
+                document.getElementById('icon').textContent = '\u2705';
+                document.getElementById('title').textContent = 'TikTok Connected!';
+                document.getElementById('msg').innerHTML = 'If not redirected: <a href="' + url + '">click here</a>';
+                s.textContent = 'Success!';
+            }, 5000);
+        } else {
+            c.classList.add('error');
+            document.getElementById('icon').textContent = '\u2753';
+            document.getElementById('title').textContent = 'Missing Code';
+            document.getElementById('msg').textContent = 'No authorization code. Try again from ViralFlow.';
+            s.textContent = 'No code parameter';
+        }
+    </script>
+</body>
+</html>
